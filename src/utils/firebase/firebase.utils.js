@@ -10,7 +10,7 @@ import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from 'firebase/auth';
 
 import {
   getFirestore, // get firestore instance
@@ -33,19 +33,21 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 
 // SETUP Authentication
-const provider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();  // there are diff providers you can use eg a provider for sigining with facebook, twitter etc...
 
-provider.setCustomParameters({
+googleProvider.setCustomParameters({
   prompt: "select_account"
 });
 
 export const auth = getAuth();
-export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+export const singInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
 
 // SETUP THE db
 export const db = getFirestore();
 
-export const createUserDocumentFromAuth = async (userAuth) => {
+export const createUserDocumentFromAuth = async (userAuth, additionalInformation = {}) => {
+  if(!userAuth) return;
   // we need to see it there is an existiing doc ref 'userDocRef' in this case. this is a special type of object that Firestore uses when talking about actual 
   // instance of a document model
   const userDocRef = doc(db, 'users', userAuth.uid);
@@ -62,7 +64,8 @@ export const createUserDocumentFromAuth = async (userAuth) => {
       await setDoc(userDocRef, {
         displayName,
         email,
-        createdAt
+        createdAt,
+        ...additionalInformation 
       });
     } catch (error) {
       console.log('error creating the user', error.message);
@@ -74,3 +77,11 @@ export const createUserDocumentFromAuth = async (userAuth) => {
   return userDocRef;
 }
 
+
+// Create a user with email and password
+// NB: this falls under Native providers so we do not need to provide a provioder
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+  if(!email || !password) return;
+
+  return await createUserWithEmailAndPassword(auth, email, password);
+}
