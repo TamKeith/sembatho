@@ -10,7 +10,16 @@ import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-import { getAuth, signInWithRedirect, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider, createUserWithEmailAndPassword } from 'firebase/auth';
+import { 
+  getAuth, 
+  signInWithRedirect, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+ } from 'firebase/auth';
 
 import {
   getFirestore, // get firestore instance
@@ -91,3 +100,15 @@ export const signInAuthUserWithEmailAndPassword = async (email, password) => {
   
   return await signInWithEmailAndPassword(auth, email, password);
 }
+
+export const signOutUser = async () => await signOut(auth);
+
+export const onAuthStateChangedListener = (callback) => 
+  /**
+   * *** These are some of the paramters that you can pass to the 'onAuthStateChanged' listener ***
+   * next: callback
+   * error: errorCallback
+   * complete: completedCallBack
+   */
+  onAuthStateChanged(auth, callback);
+  

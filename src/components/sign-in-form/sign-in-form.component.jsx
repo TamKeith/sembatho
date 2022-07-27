@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getRedirectResult } from "firebase/auth";
 
 import FormInput from '../form-input/form-input.component';
 import Button from "../button/button.component";
+
+//import { UserContext } from "../../contexts/user.context";
 
 import { 
   auth, 
@@ -23,6 +25,8 @@ const SignInForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
 
+  // const { setCurrentUser } = useContext(UserContext);
+
   const resetFormFields = () => {
     setFormFields(defaultFormFields);
   }
@@ -30,8 +34,8 @@ const SignInForm = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await signInAuthUserWithEmailAndPassword (email, password);
-      console.log(response);
+      const { user } = await signInAuthUserWithEmailAndPassword (email, password);
+      //setCurrentUser(user);
       resetFormFields();
     } catch(error) {
       switch(error.code){
@@ -61,22 +65,24 @@ const SignInForm = () => {
   //   }
   // }, []);
   //                    OR
-  useEffect(() =>{
-    async function fetchResponse(){
-      const response = await getRedirectResult(auth);
-      console.log(response);
+  // useEffect(() =>{
+  //   async function fetchResponse(){
+  //     const response = await getRedirectResult(auth);
+  //     console.log(response);
 
-      if(response) {
-        const userDocRef = await createUserDocumentFromAuth(response.user);
-      }
-    } 
-    fetchResponse();
-  }, []);
+  //     if(response) {
+  //       const userDocRef = await createUserDocumentFromAuth(response.user);
+  //     }
+  //   } 
+  //   fetchResponse();
+  // }, []);
 
   const signInWithGoogle = async (event) => {
     // Destructure the 'user' from the response which is basically some userAuthentication object and use that in the next method
-    const {user} = await signInWithGooglePopup();
-    // const userDocRef = await createUserDocumentFromAuth(user);   <--- we do not need this anymore since we were just logging it
+    // const {user} = await signInWithGooglePopup(); <------ no longer need to destructure the user
+    // setCurrentUser(user);
+    // const userDocRef = await createUserDocumentFromAuth(user);   <--- function is now moved to the user.context
+    await signInWithGooglePopup();
   }
 
   const handleChange = (event) =>{
