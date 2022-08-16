@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { getRedirectResult } from "firebase/auth";
 
 import FormInput from '../form-input/form-input.component';
-import Button from "../button/button.component";
+import Button, { BUTTON_TYPE_CLASSES } from "../button/button.component";
 
 //import { UserContext } from "../../contexts/user.context";
 
@@ -13,7 +13,7 @@ import {
   signInAuthUserWithEmailAndPassword ,
   createUserDocumentFromAuth } from "../../utils/firebase/firebase.utils";
 
-import './sign-in-form.styles.scss';
+import { SigninOuterContainer, SignInContainer, ButtonsContainer } from './sign-in-form.styles.jsx';
 
 const defaultFormFields = {
   email: '',
@@ -91,8 +91,8 @@ const SignInForm = () => {
   }
 
   return (
-    <div className="sign-in-outer-container">
-      <div className="sign-in-container">
+    <SigninOuterContainer>
+      <SignInContainer>
         <h2>Already have an account</h2>
         <span>Sign Up with your email and password</span>  
 
@@ -102,10 +102,10 @@ const SignInForm = () => {
 
           <FormInput label="Password:" type="password" required onChange={handleChange} name="password" value={password}/>
           
-          <div className="buttons-container">
+          <ButtonsContainer>
             <Button type="submit">Sign In</Button>
-            <Button type="button" buttonType="google" onClick={signInWithGoogle}>Google Sign In</Button>
-          </div>
+            <Button type="button" buttonType={BUTTON_TYPE_CLASSES.google} onClick={signInWithGoogle}>Google Sign In</Button>
+          </ButtonsContainer>
           
 
         </form>
@@ -116,8 +116,8 @@ const SignInForm = () => {
         <button onClick={singInWithGoogleRedirect}>
           Sign in with Google Redirect
         </button>*/}
-      </div>
-    </div>
+      </SignInContainer>
+    </SigninOuterContainer>
   );
 }
 

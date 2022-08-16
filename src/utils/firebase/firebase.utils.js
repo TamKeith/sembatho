@@ -26,6 +26,10 @@ import {
   doc, // to get the document instance
   getDoc, // to get the document's data 
   setDoc, // to set the document's data
+  collection, // allows us to get a collection ref (same as we got a collection ref) coz we are trying to write to a brand new collection
+  writeBatch,
+  query,
+  getDocs
 } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
@@ -54,6 +58,57 @@ export const singInWithGoogleRedirect = () => signInWithRedirect(auth, googlePro
 
 // SETUP THE db
 export const db = getFirestore();
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+  // create the collectionRef to store all the different json objects
+  const collectionRef = collection(db, collectionKey);
+  // writebatch allows us to add our objects to this collection in one successful transaction. instatiate a batch class
+  const batch = writeBatch(db);
+  // with this batch instance you can now attach a bunch of different writes, deletes, sets etc to the batch and only when we are ready to fire off the batch
+  // does the actual transaction begin
+  objectsToAdd.forEach((object) => {
+    const docRef = doc(collectionRef, object.title.toLowerCase());
+    batch.set(docRef, object);
+  });
+
+  await batch.commit();
+  console.log('done');
+}
+
+export const getCategoriesAndDocuments = async () => {
+  const collectionRef = collection(db, 'categories');
+  const q = query(collectionRef); // generate a query off of this collectionRef
+
+  const querySnapshot = await getDocs(q); // get a snapshot from the object generated above by the query method
+  const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
+    const { title, items } = docSnapshot.data();
+    acc[title.toLowerCase()] = items;
+    return acc;
+  }, {});
+  
+  return categoryMap;
+  /**
+  This is the structure of categoryMap that we care trying to build
+  {
+    hats: {
+      title: 'Hats',
+      items: [
+        {},
+        {}
+      ]
+    },
+    sneakers: {
+      titls: 'Sneakers',
+      items: [
+        {},
+        {}
+      ]
+    }
+  }
+
+ */
+}
+
 
 export const createUserDocumentFromAuth = async (userAuth, additionalInformation = {}) => {
   if(!userAuth) return;
