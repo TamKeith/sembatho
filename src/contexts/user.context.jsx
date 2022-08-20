@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useReducer } from "react";
 
 import { onAuthStateChangedListener, createUserDocumentFromAuth } from "../utils/firebase/firebase.utils";
 
@@ -8,13 +8,48 @@ export const UserContext = createContext({
   setCurrentUser: () => null
 });
 
+
+export const USER_ACTION_TYPES = {
+  SET_CURRENT_USER: 'SET_CURRENT_USER'
+}
+
+const userReducer = (state, action) => {
+  console.log('dispatched');
+  console.log(action);
+  const { type, payload } = action;
+
+  switch(type) {
+    case USER_ACTION_TYPES.SET_CURRENT_USER:
+      return {
+        ...state,
+        currentUser: payload
+      }
+    default: 
+        throw new Error(`unhandled type ${type} in userReducer`)
+  }
+}
+
+const INITIAL_STATE = {
+  currentUser: null
+}
+
+
 // the actual component. on every context that gets built for us there is a .Provider and the .Provider is the component that will wrap around
 // any other components that need access to the values inside
 // <UserProvider>
 //  <app />               <----------- app is the children in this case
 // </UserProvider>
 export const UserProvider = ({ children }) => {
-  const [ currentUser, setCurrentUser ] = useState(null);
+  // const [ currentUser, setCurrentUser ] = useState(null);    <---- using REDUCERS instead of useState:
+  // START CALLING REDUCER METHODS
+  const [ state, dispatch ] = useReducer(userReducer, INITIAL_STATE);
+  const { currentUser } = state;
+  console.log(currentUser);
+  const setCurrentUser = (user) => {
+    dispatch({ type: USER_ACTION_TYPES.SET_CURRENT_USER, payload: user }) // <------- dispatch is how we pass in the action to our reducer
+  }
+  // END CALLING REDUCER METHODS
+
   const value = {currentUser, setCurrentUser};
 
   useEffect(() => {
@@ -31,3 +66,15 @@ export const UserProvider = ({ children }) => {
 
   return <UserContext.Provider value={value}>{ children }</UserContext.Provider>
 } 
+
+/**
+
+Reducers: functions that always return a new  object based on the actions passed into them
+
+const userReducer = (state, action) => {
+  return {
+    currentUser:
+  }
+}
+
+ */
