@@ -1,5 +1,7 @@
 import { createContext, useState, useEffect, useReducer } from "react";
 
+import { createAction } from "../utils/reducer/reducer.utils";
+
 import { onAuthStateChangedListener, createUserDocumentFromAuth } from "../utils/firebase/firebase.utils";
 
 // as the actual value you want to access
@@ -11,6 +13,10 @@ export const UserContext = createContext({
 
 export const USER_ACTION_TYPES = {
   SET_CURRENT_USER: 'SET_CURRENT_USER'
+}
+
+const INITIAL_STATE = {
+  currentUser: null
 }
 
 const userReducer = (state, action) => {
@@ -29,10 +35,6 @@ const userReducer = (state, action) => {
   }
 }
 
-const INITIAL_STATE = {
-  currentUser: null
-}
-
 
 // the actual component. on every context that gets built for us there is a .Provider and the .Provider is the component that will wrap around
 // any other components that need access to the values inside
@@ -46,12 +48,13 @@ export const UserProvider = ({ children }) => {
   const { currentUser } = state;
   console.log(currentUser);
   const setCurrentUser = (user) => {
-    dispatch({ type: USER_ACTION_TYPES.SET_CURRENT_USER, payload: user }) // <------- dispatch is how we pass in the action to our reducer
+    dispatch(createAction(USER_ACTION_TYPES.SET_CURRENT_USER, user)); // <------- dispatch is how we pass in the action to our reducer
   }
   // END CALLING REDUCER METHODS
 
   const value = {currentUser, setCurrentUser};
 
+  // THIS USEEFFECT IS NOW BEING FIRED FROM THE APP.JS FILE SINCE THE USER PROVIDER IS NO LONGER IN USE:
   useEffect(() => {
     // we need to stop listening when this component unmounts to avoid memory leaks
     // this method returns a function that will unsubscribe ie stop listening
@@ -68,7 +71,6 @@ export const UserProvider = ({ children }) => {
 } 
 
 /**
-
 Reducers: functions that always return a new  object based on the actions passed into them
 
 const userReducer = (state, action) => {
@@ -76,5 +78,4 @@ const userReducer = (state, action) => {
     currentUser:
   }
 }
-
  */

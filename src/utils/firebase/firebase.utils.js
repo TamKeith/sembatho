@@ -79,14 +79,18 @@ export const getCategoriesAndDocuments = async () => {
   const collectionRef = collection(db, 'categories');
   const q = query(collectionRef); // generate a query off of this collectionRef
 
-  const querySnapshot = await getDocs(q); // get a snapshot from the object generated above by the query method
-  const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
-    const { title, items } = docSnapshot.data();
-    acc[title.toLowerCase()] = items;
-    return acc;
-  }, {});
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(docSnapShot => docSnapShot.data());
+
+  // FORMAT OF THE DATA RETURNED WHEN WE USED THE CONTEXT API:
+  // const querySnapshot = await getDocs(q); // get a snapshot from the object generated above by the query method
+  // const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
+  //   const { title, items } = docSnapshot.data();
+  //   acc[title.toLowerCase()] = items;
+  //   return acc;
+  // }, {});
   
-  return categoryMap;
+  // return categoryMap;
   /**
   This is the structure of categoryMap that we care trying to build
   {
