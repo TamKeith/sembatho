@@ -142,7 +142,9 @@ export const createUserDocumentFromAuth = async (userAuth, additionalInformation
   }
   // if user data exists
   // return userDocRef
-  return userDocRef;
+
+  // return userDocRef;
+  return userSnapshot; // we want the data now so that we can store it inside our Reducer
 }
 
 
@@ -170,4 +172,18 @@ export const onAuthStateChangedListener = (callback) =>
    * complete: completedCallBack
    */
   onAuthStateChanged(auth, callback);
+
+export const getCurrentUser = () => {
+  // we are converting from Observable listener into a Promise based function call
+  return new Promise((resolve, reject) => { // positive and negative handle cases for a promise
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (userAuth) => {
+        unsubscribe();
+        resolve(userAuth);
+      },
+      reject  // reject is a callback that takes whatever you pass to it, usually it is an error and it will actually reject it so the Promise knows to reject
+    );
+  });
+}
   

@@ -1,10 +1,13 @@
 import { useState, useContext } from "react";
+import { useDispatch } from "react-redux";
 
 import FormInput from '../form-input/form-input.component';
 import Button from "../button/button.component";
 
 // import { UserContext } from "../../contexts/user.context";
 import { createAuthUserWithEmailAndPassword, createUserDocumentFromAuth } from "../../utils/firebase/firebase.utils";
+
+import { signUpStart } from "../../store/user/user.action";
 
 import { SignupOuterContainer, SignupContainer, HaveAccount } from './sign-up-form.styles.jsx';
 
@@ -16,6 +19,8 @@ const defaultFormFields = {
 }
 
 const SignUpForm = () => {
+
+  const dispatch = useDispatch();
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
@@ -38,13 +43,15 @@ const SignUpForm = () => {
     }
 
     try {
-      const {user} = await createAuthUserWithEmailAndPassword(email, password);
+      // const {user} = await createAuthUserWithEmailAndPassword(email, password);    <-------- movec code to redux-saga
 
       // 3) then create a user document
       // 4) also pass displayName when generating the document
-      await createUserDocumentFromAuth(user, { displayName });
+      // await createUserDocumentFromAuth(user, { displayName });    <------- moved code to redux-saga
       // 5) clear up the sign-up fields after
       // setCurrentUser(user);
+
+      dispatch(signUpStart(email, password, displayName));
       resetFormFields();
       
     } catch(error) {

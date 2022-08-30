@@ -4,7 +4,11 @@
 import { compose, createStore, applyMiddleware } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+// import thunk from 'redux-thunk'; <----- SAGAs replace thunks, you mainly want one async lib Sagas or Thunks Redux-RxJs/Redux-Observable
+import createSagaMiddleware from '@redux-saga/core';
 import { loggerMiddleware } from './middleware/logger';
+
+import { rootSaga } from './root-saga';
 
 // import { configureStore } from '@reduxjs/toolkit';
 
@@ -37,14 +41,21 @@ with3(2, 4); // 3 + 2 - 4
 const persistConfig = {
   key: 'root',  // persist the whole thing from the root level
   storage,
-  blacklist: ['user']
+  whitelist: ['cart'] // this is typically what we normally persist
+  // blacklist: ['user'] // we normally do not persist the user object to avoid weird errors since the auth is tracking the user
 }
+
+const sagaMidleware = createSagaMiddleware();
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // older way of creating the store:
 // or you can use custom 'loggerMiddleware'
-const middleWares = [process.env.NODE_ENV !== 'production' && logger].filter(Boolean); 
+const middleWares = [
+  process.env.NODE_ENV !== 'production' && logger, 
+  sagaMidleware
+  // thunk
+].filter(Boolean); 
 
 // setting up your website so that it can use the Redux Devtools you need to modify the compose method. You modify to determine if you want to 
 // use "Redux's compose" or the "DevTools' compose"
@@ -58,6 +69,9 @@ export const store = createStore(
   undefined, 
   composedEnhancers
 );
+
+// after the store has been instantiated with the actual sagaMiddleware inside, then we tell the saga middleware to run
+sagaMidleware.run(rootSaga);
 
 export const persistor = persistStore(store);
 

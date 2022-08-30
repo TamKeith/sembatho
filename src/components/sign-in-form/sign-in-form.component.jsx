@@ -1,6 +1,8 @@
 import { useEffect, useState, useContext } from "react";
 import { getRedirectResult } from "firebase/auth";
 
+import { useDispatch } from "react-redux";
+
 import FormInput from '../form-input/form-input.component';
 import Button, { BUTTON_TYPE_CLASSES } from "../button/button.component";
 
@@ -15,12 +17,16 @@ import {
 
 import { SigninOuterContainer, SignInContainer, ButtonsContainer } from './sign-in-form.styles.jsx';
 
+import { googleSignInStart, emailSignInStart } from "../../store/user/user.action";
+
 const defaultFormFields = {
   email: '',
   password: ''
 }
 
 const SignInForm = () => {
+
+  const dispatch = useDispatch();
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
@@ -34,8 +40,9 @@ const SignInForm = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const { user } = await signInAuthUserWithEmailAndPassword (email, password);
+      // const { user } = await signInAuthUserWithEmailAndPassword (email, password);
       //setCurrentUser(user);
+      dispatch(emailSignInStart(email, password));
       resetFormFields();
     } catch(error) {
       switch(error.code){
@@ -82,7 +89,9 @@ const SignInForm = () => {
     // const {user} = await signInWithGooglePopup(); <------ no longer need to destructure the user
     // setCurrentUser(user);
     // const userDocRef = await createUserDocumentFromAuth(user);   <--- function is now moved to the user.context
-    await signInWithGooglePopup();
+
+    // await signInWithGooglePopup();
+    dispatch(googleSignInStart());
   }
 
   const handleChange = (event) =>{
